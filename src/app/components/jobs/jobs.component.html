@@ -1,0 +1,20 @@
+<div class="min-h-screen bg-gray-100 p-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Job Listings</h1>
+  
+    @if (errorMessage) {
+      <p class="text-red-600 text-center">{{ errorMessage }}</p>
+    }
+  
+    <div class="max-w-2xl mx-auto flex flex-col gap-4">
+      @for (job of jobs; track job.id) {
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold">{{ job.title }}</h2>
+          <p class="text-gray-600 text-sm mb-2">{{ job.companyName }} · {{ job.location }} · {{ job.jobType || 'Not specified' }}</p>
+          <p class="text-gray-800 mb-2">{{ job.description }}</p>
+          <p class="text-green-700 font-medium">LKR {{ job.salary }}</p>
+        </div>
+      } @empty {
+        <p class="text-center text-gray-500">No jobs found.</p>
+      }
+    </div>
+  </div>
