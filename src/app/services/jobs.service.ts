@@ -18,8 +18,7 @@ interface Job {
 })
 export class JobsService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://hirehub-api-drgfbjdeeyh8e8e2.indonesiacentral-01.azurewebsites.net/api/jobs';
-
+  private apiUrl = 'http://localhost:5036/api/jobs';
   getJobs(): Observable<Job[]> {
     const token = localStorage.getItem('token');
     return this.http.get<Job[]>(this.apiUrl, {
