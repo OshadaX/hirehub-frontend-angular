@@ -1,0 +1,160 @@
+<div class="h-full flex antialiased w-full">
+  <!-- SideNavBar -->
+  <nav class="hidden lg:flex flex-col h-screen sticky top-0 py-6 bg-surface-container-low border-r border-outline-variant/20 w-64 flex-shrink-0 z-40">
+    <!-- Brand/Header -->
+    <div class="px-6 mb-8 flex items-center gap-4">
+      <span class="material-symbols-outlined text-primary text-3xl">work</span>
+      <div>
+        <h2 class="text-xl font-headline font-semibold text-primary">HireHub</h2>
+        <p class="text-sm text-on-surface-variant font-label">Employer Portal</p>
+      </div>
+    </div>
+    <!-- Main Navigation Tabs -->
+    <div class="flex flex-col gap-2 px-2 flex-grow font-label">
+      <a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 transition-all duration-200 ease-in-out font-semibold" routerLink="/employee-dashboard">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+        Dashboard
+      </a>
+      <a class="flex items-center gap-3 text-secondary px-4 py-3 hover:bg-secondary-container/50 rounded-lg transition-all duration-200 ease-in-out" routerLink="/find-jobs">
+        <span class="material-symbols-outlined">work</span>
+        Browse Jobs
+      </a>
+      <a class="flex items-center gap-3 text-secondary px-4 py-3 hover:bg-secondary-container/50 rounded-lg transition-all duration-200 ease-in-out" routerLink="/review-application/all">
+        <span class="material-symbols-outlined">description</span>
+        Review Applications
+      </a>
+    </div>
+    <!-- Footer Navigation Tabs -->
+    <div class="flex flex-col gap-2 px-2 mt-auto font-label">
+      <a class="flex items-center gap-3 text-error px-4 py-3 hover:bg-error-container/50 rounded-lg transition-all duration-200 ease-in-out" routerLink="/login" (click)="logout()">
+        <span class="material-symbols-outlined">logout</span>
+        Logout
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Canvas -->
+  <main class="flex-grow overflow-y-auto w-full px-4 md:px-12 py-8 md:py-12 bg-background flex flex-col gap-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-outline-variant/30 pb-6">
+      <div class="max-w-2xl">
+        <h1 class="text-4xl font-headline font-bold text-primary mb-2">Welcome back, {{ userName }}</h1>
+        <p class="text-lg text-on-surface-variant">Here is an overview of your current hiring efforts and active job postings.</p>
+      </div>
+      <div class="flex gap-4">
+        <a class="bg-primary text-on-primary border border-primary rounded-lg px-6 py-3 font-semibold hover:bg-primary/90 transition-all shadow-sm" routerLink="/review-application/all">
+          View All Applications
+        </a>
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-24">
+        <div class="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      </div>
+    }
+
+    @if (!isLoading) {
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-surface-bright rounded-xl p-6 border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)] flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300">
+          <div class="bg-primary-container/40 p-4 rounded-full text-primary">
+            <span class="material-symbols-outlined text-3xl">work_outline</span>
+          </div>
+          <div>
+            <p class="text-sm text-secondary font-semibold uppercase tracking-wider">Active Jobs</p>
+            <p class="text-3xl font-headline font-bold text-on-surface">{{ activeJobsCount }}</p>
+          </div>
+        </div>
+        <div class="bg-surface-bright rounded-xl p-6 border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)] flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300">
+          <div class="bg-tertiary-container/40 p-4 rounded-full text-tertiary">
+            <span class="material-symbols-outlined text-3xl">description</span>
+          </div>
+          <div>
+            <p class="text-sm text-secondary font-semibold uppercase tracking-wider">Total Applications</p>
+            <p class="text-3xl font-headline font-bold text-on-surface">{{ totalApplicationsCount }}</p>
+          </div>
+        </div>
+        <div class="bg-surface-bright rounded-xl p-6 border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)] flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300">
+          <div class="bg-secondary-container/40 p-4 rounded-full text-secondary">
+            <span class="material-symbols-outlined text-3xl">pending_actions</span>
+          </div>
+          <div>
+            <p class="text-sm text-secondary font-semibold uppercase tracking-wider">Pending Review</p>
+            <p class="text-3xl font-headline font-bold text-on-surface">{{ pendingApplicationsCount }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Applications -->
+      <div class="bg-surface-container-low rounded-2xl border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden">
+        <div class="flex items-center justify-between px-8 py-6 border-b border-outline-variant/20">
+          <h2 class="text-xl font-headline font-bold text-on-surface">Recent Applications</h2>
+          <a class="text-primary text-sm font-semibold hover:underline flex items-center gap-1" routerLink="/review-application/all">
+            View All
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
+        </div>
+        @if (applications.length === 0) {
+          <div class="flex flex-col items-center py-16 gap-3">
+            <span class="material-symbols-outlined text-on-surface-variant text-5xl">inbox</span>
+            <p class="text-on-surface-variant">No applications yet.</p>
+          </div>
+        }
+        @if (applications.length > 0) {
+          <div class="divide-y divide-outline-variant/20">
+            @for (app of applications.slice(0, 5); track app.id) {
+              <div class="flex items-center gap-4 px-8 py-4 hover:bg-surface-container-highest/50 transition-colors">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-container/40 rounded-full flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-lg">person</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-on-surface truncate">{{ app.userName }}</p>
+                  <p class="text-sm text-on-surface-variant truncate">{{ app.jobTitle }}</p>
+                </div>
+                <span [class]="'text-xs font-bold px-3 py-1 rounded-full ' + (app.status === 'Accepted' || app.status === '2' ? 'bg-green-100 text-green-800' : app.status === 'Rejected' || app.status === '3' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')">
+                  {{ app.status || 'Pending' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Job Listings Summary -->
+      <div class="bg-surface-container-low rounded-2xl border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden">
+        <div class="flex items-center justify-between px-8 py-6 border-b border-outline-variant/20">
+          <h2 class="text-xl font-headline font-bold text-on-surface">Active Job Postings</h2>
+          <a class="text-primary text-sm font-semibold hover:underline flex items-center gap-1" routerLink="/find-jobs">
+            Browse All
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
+        </div>
+        @if (jobs.length === 0) {
+          <div class="flex flex-col items-center py-16 gap-3">
+            <span class="material-symbols-outlined text-on-surface-variant text-5xl">work_off</span>
+            <p class="text-on-surface-variant">No job postings yet.</p>
+          </div>
+        }
+        @if (jobs.length > 0) {
+          <div class="divide-y divide-outline-variant/20">
+            @for (job of jobs.slice(0, 5); track job.id) {
+              <a [routerLink]="['/job-details', job.id]" class="flex items-center gap-4 px-8 py-4 hover:bg-surface-container-highest/50 transition-colors cursor-pointer">
+                <div class="flex-shrink-0 w-10 h-10 bg-tertiary-container/40 rounded-full flex items-center justify-center">
+                  <span class="material-symbols-outlined text-tertiary text-lg">work</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-on-surface truncate">{{ job.title }}</p>
+                  <p class="text-sm text-on-surface-variant truncate">{{ job.companyName }} · {{ job.location }}</p>
+                </div>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-primary-container/30 text-primary">
+                  {{ job.jobType || 'Full-Time' }}
+                </span>
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>

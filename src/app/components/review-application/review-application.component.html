@@ -1,0 +1,130 @@
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface shadow-sm border-b border-outline-variant/30">
+  <div class="flex items-center gap-4">
+    <a class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 group cursor-pointer" routerLink="/employee-dashboard">
+      <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+      <span class="font-semibold text-sm">Dashboard</span>
+    </a>
+    <div class="h-6 w-px bg-outline-variant/50 mx-2"></div>
+    <a class="text-2xl font-headline font-bold text-primary" routerLink="/employee-dashboard">HireHub</a>
+  </div>
+  <button class="text-error text-sm font-semibold hover:bg-error-container/20 px-4 py-2 rounded-lg transition-colors" routerLink="/login" (click)="logout()">
+    Sign Out
+  </button>
+</header>
+
+<main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-headline font-bold text-primary mb-1">Review Applications</h1>
+    <p class="text-on-surface-variant">Review and update the status of all submitted applications.</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="flex justify-center items-center py-24">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+        <p class="text-on-surface-variant">Loading applications...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!isLoading && errorMessage) {
+    <div class="flex flex-col items-center py-24 gap-4">
+      <span class="material-symbols-outlined text-error text-5xl">error</span>
+      <p class="text-error font-semibold">{{ errorMessage }}</p>
+      <button (click)="loadApplications()" class="bg-primary text-on-primary px-6 py-2 rounded-lg font-semibold">Retry</button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && !errorMessage && applications.length === 0) {
+    <div class="flex flex-col items-center py-24 gap-4">
+      <span class="material-symbols-outlined text-on-surface-variant text-6xl">inbox</span>
+      <p class="text-on-surface-variant text-lg">No applications have been submitted yet.</p>
+    </div>
+  }
+
+  <!-- Applications List -->
+  @if (!isLoading && !errorMessage && applications.length > 0) {
+    <div class="bg-surface-container-low rounded-2xl border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden">
+      <div class="px-8 py-4 border-b border-outline-variant/20 bg-surface-container-highest/30 flex items-center">
+        <span class="font-semibold text-on-surface-variant text-sm uppercase tracking-wider">{{ applications.length }} Application{{ applications.length !== 1 ? 's' : '' }}</span>
+      </div>
+      <div class="divide-y divide-outline-variant/20">
+        @for (app of applications; track app.id) {
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 px-6 py-5 hover:bg-surface-container-highest/30 transition-colors">
+            <!-- Applicant Info -->
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-container/50 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">person</span>
+              </div>
+              <div class="min-w-0">
+                <p class="font-semibold text-on-surface">{{ app.userName }}</p>
+                <p class="text-sm text-on-surface-variant">{{ app.userEmail }}</p>
+              </div>
+            </div>
+
+            <!-- Job Title -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-on-surface-variant font-medium uppercase tracking-wide mb-0.5">Position</p>
+              <p class="font-semibold text-on-surface truncate">{{ app.jobTitle }}</p>
+            </div>
+
+            <!-- Applied Date -->
+            <div class="hidden md:block flex-shrink-0 w-28 text-right">
+              <p class="text-xs text-on-surface-variant">Applied</p>
+              <p class="text-sm font-medium text-on-surface">{{ formatDate(app.appliedAt) }}</p>
+            </div>
+
+            <!-- Status Badge -->
+            <div class="flex-shrink-0">
+              <span [class]="'text-xs font-bold px-3 py-1.5 rounded-full ' + getStatusBadgeClass(app.status)">
+                {{ app.status || 'Pending' }}
+              </span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 flex-shrink-0">
+              <button
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-100 text-green-800 hover:bg-green-200 transition-colors disabled:opacity-50"
+                [disabled]="updatingId === app.id"
+                (click)="updateStatus(app, 2)">
+                @if (updatingId === app.id) { ... } @else { Accept }
+              </button>
+              <button
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors disabled:opacity-50"
+                [disabled]="updatingId === app.id"
+                (click)="updateStatus(app, 1)">
+                @if (updatingId === app.id) { ... } @else { Review }
+              </button>
+              <button
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-800 hover:bg-red-200 transition-colors disabled:opacity-50"
+                [disabled]="updatingId === app.id"
+                (click)="updateStatus(app, 3)">
+                @if (updatingId === app.id) { ... } @else { Reject }
+              </button>
+            </div>
+          </div>
+
+          <!-- Cover Letter (Collapsible hint) -->
+          @if (app.coverLetter) {
+            <div class="px-6 pb-4 bg-surface-container-low/50">
+              <details class="text-sm">
+                <summary class="cursor-pointer text-primary font-medium hover:underline list-none flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                  View Cover Letter
+                </summary>
+                <div class="mt-3 pl-6 border-l-2 border-primary/30 text-on-surface-variant whitespace-pre-line">
+                  {{ app.coverLetter }}
+                </div>
+              </details>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</main>

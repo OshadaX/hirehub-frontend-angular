@@ -1,0 +1,178 @@
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface-container-low border-b border-outline-variant/30 shadow-sm transition-all">
+  <div class="flex items-center gap-8">
+    <a class="text-2xl font-headline font-bold text-primary" routerLink="/find-jobs">HireHub</a>
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:flex items-center gap-6">
+      <a class="text-primary font-bold border-b-2 border-primary pb-1" routerLink="/find-jobs">Find Jobs</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-highest px-3 py-2 rounded-md" routerLink="/employee-dashboard">Dashboard</a>
+    </nav>
+  </div>
+  <div class="flex items-center gap-4">
+    <span class="hidden md:block text-sm text-on-surface-variant font-semibold">{{ userName }}</span>
+    <button class="text-error font-semibold hover:bg-error-container/20 px-4 py-2 rounded-lg transition-colors text-sm" routerLink="/login" (click)="logout()">
+      Sign Out
+    </button>
+  </div>
+</header>
+
+<!-- Main Content Area -->
+<main class="flex-1 mt-16 pt-8 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-8">
+
+  <!-- Sidebar Filters -->
+  <aside class="w-full md:w-72 flex-shrink-0">
+    <div class="sticky top-24 space-y-8 bg-surface-container-low p-6 rounded-xl border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)]">
+      <div>
+        <h3 class="font-headline text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-tertiary">filter_list</span>
+          Filters
+        </h3>
+        <!-- Job Type Filter -->
+        <div class="mb-6">
+          <h4 class="font-semibold text-on-surface-variant mb-3 text-sm tracking-wide uppercase">Job Type</h4>
+          <div class="space-y-2.5">
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input class="rounded border-outline-variant text-primary focus:ring-primary bg-surface w-5 h-5 transition-colors" type="checkbox" />
+              <span class="text-on-surface group-hover:text-primary transition-colors">Full-Time</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input class="rounded border-outline-variant text-primary focus:ring-primary bg-surface w-5 h-5 transition-colors" type="checkbox" />
+              <span class="text-on-surface group-hover:text-primary transition-colors">Part-Time</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input class="rounded border-outline-variant text-primary focus:ring-primary bg-surface w-5 h-5 transition-colors" type="checkbox" />
+              <span class="text-on-surface group-hover:text-primary transition-colors">Remote</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input class="rounded border-outline-variant text-primary focus:ring-primary bg-surface w-5 h-5 transition-colors" type="checkbox" />
+              <span class="text-on-surface group-hover:text-primary transition-colors">Contract</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Job Listings Canvas -->
+  <section class="flex-1">
+    <!-- Search / Hero Area -->
+    <div class="mb-10 bg-primary-container/20 rounded-2xl p-8 relative overflow-hidden border border-primary-container/30">
+      <div class="relative z-10">
+        <h1 class="text-3xl md:text-4xl font-headline font-bold text-primary mb-2">Find your next role</h1>
+        <p class="text-on-surface-variant text-lg mb-6 max-w-2xl">Discover opportunities that match your skills and ambitions.</p>
+        <div class="flex flex-col sm:flex-row gap-3 bg-surface p-2 rounded-xl shadow-[0_4px_20px_rgba(46,50,48,0.06)] border border-outline-variant/20">
+          <div class="flex-1 flex items-center px-4 border-b sm:border-b-0 sm:border-r border-outline-variant/20 py-2 sm:py-0">
+            <span class="material-symbols-outlined text-primary mr-3">search</span>
+            <input [(ngModel)]="searchQuery" (ngModelChange)="onSearch()"
+              class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/60 p-0 text-lg"
+              placeholder="Job title, keyword, or company" type="text" />
+          </div>
+          <div class="flex-1 flex items-center px-4 py-2 sm:py-0">
+            <span class="material-symbols-outlined text-primary mr-3">location_on</span>
+            <input [(ngModel)]="locationQuery" (ngModelChange)="onSearch()"
+              class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/60 p-0 text-lg"
+              placeholder="City, state, or remote" type="text" />
+          </div>
+          <button (click)="onSearch()" class="bg-primary text-on-primary px-8 py-3 rounded-lg font-semibold hover:bg-primary-fixed-variant transition-colors sm:w-auto w-full">
+            Search
+          </button>
+        </div>
+      </div>
+      <div class="absolute -bottom-16 -right-16 w-64 h-64 bg-primary-container rounded-full opacity-20 blur-3xl"></div>
+      <div class="absolute -top-16 -left-16 w-48 h-48 bg-tertiary-container rounded-full opacity-10 blur-2xl"></div>
+    </div>
+
+    <!-- Header for Results -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="font-headline text-xl font-semibold text-on-surface">
+        @if (isLoading) { Loading jobs... }
+        @else { Showing {{ filteredJobs.length }} job{{ filteredJobs.length !== 1 ? 's' : '' }} }
+      </h2>
+    </div>
+
+    <!-- Loading state -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-24">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          <p class="text-on-surface-variant">Loading jobs from server...</p>
+        </div>
+      </div>
+    }
+
+    <!-- Error state -->
+    @if (!isLoading && errorMessage) {
+      <div class="flex flex-col items-center py-24 gap-4">
+        <span class="material-symbols-outlined text-error text-5xl">error</span>
+        <p class="text-error font-semibold">{{ errorMessage }}</p>
+        <button (click)="loadJobs()" class="bg-primary text-on-primary px-6 py-2 rounded-lg font-semibold">Retry</button>
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!isLoading && !errorMessage && filteredJobs.length === 0) {
+      <div class="flex flex-col items-center py-24 gap-4">
+        <span class="material-symbols-outlined text-on-surface-variant text-6xl">work_off</span>
+        <p class="text-on-surface-variant text-lg">No jobs found matching your search.</p>
+      </div>
+    }
+
+    <!-- Job Cards Grid -->
+    @if (!isLoading && !errorMessage && filteredJobs.length > 0) {
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        @for (job of filteredJobs; track job.id; let i = $index) {
+          <article
+            [routerLink]="['/job-details', job.id]"
+            [class]="i === 0 ? 'col-span-1 xl:col-span-2 bg-surface-container-low rounded-2xl p-6 border border-primary/20 hover:border-primary/50 transition-all shadow-[0_4px_20px_rgba(46,50,48,0.04)] hover:shadow-[0_8px_30px_rgba(74,124,89,0.12)] group relative overflow-hidden flex flex-col md:flex-row gap-6 cursor-pointer' : 'bg-surface rounded-2xl p-6 border border-outline-variant/30 hover:border-primary/40 transition-all shadow-[0_4px_20px_rgba(46,50,48,0.03)] hover:shadow-[0_4px_20px_rgba(46,50,48,0.08)] group flex flex-col h-full cursor-pointer'">
+            @if (i === 0) {
+              <div class="absolute top-0 left-0 w-2 h-full bg-primary rounded-l-2xl"></div>
+            }
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-start mb-1">
+                  <h3 [class]="i === 0 ? 'font-headline text-2xl font-bold text-on-surface group-hover:text-primary transition-colors' : 'font-headline text-lg font-bold text-on-surface mb-1 group-hover:text-primary transition-colors'">
+                    {{ job.title }}
+                  </h3>
+                  @if (i === 0) {
+                    <span class="bg-tertiary-container/30 text-on-tertiary-container text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Featured</span>
+                  }
+                </div>
+                <p class="text-primary font-semibold mb-3 text-sm">{{ job.companyName }}</p>
+                <div class="flex flex-wrap gap-4 text-sm text-on-surface-variant mb-4">
+                  <span class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">location_on</span>
+                    {{ job.location || 'Location not specified' }}
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">work</span>
+                    {{ job.jobType || 'Not specified' }}
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">payments</span>
+                    {{ formatSalary(job.salary) }}
+                  </span>
+                </div>
+                @if (i === 0 && job.description) {
+                  <p class="text-on-surface-variant text-sm line-clamp-2 max-w-2xl mb-4">{{ job.description }}</p>
+                }
+              </div>
+              <div class="flex items-center justify-between mt-auto border-t border-outline-variant/20 pt-3">
+                <div></div>
+                <span class="text-xs text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">schedule</span>
+                  {{ timeAgo(job.createdAt) }}
+                </span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="w-full py-12 px-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-highest border-t border-outline-variant/50">
+  <div class="font-headline text-lg text-secondary">HireHub</div>
+  <div class="font-body text-sm tracking-wide text-on-surface-variant">© 2024 HireHub. All rights reserved.</div>
+</footer>

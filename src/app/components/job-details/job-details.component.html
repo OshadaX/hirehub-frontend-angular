@@ -1,0 +1,179 @@
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface shadow-sm border-b border-outline-variant/30">
+  <div class="flex items-center gap-4">
+    <a class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 group cursor-pointer" routerLink="/find-jobs">
+      <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+      <span class="font-semibold text-sm">Back to Search</span>
+    </a>
+    <div class="h-6 w-px bg-outline-variant/50 mx-2"></div>
+    <a class="text-2xl font-headline font-bold text-primary flex items-center gap-2" routerLink="/find-jobs">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">work</span>
+      HireHub
+    </a>
+  </div>
+</header>
+
+<!-- Loading State -->
+@if (isLoading) {
+  <div class="flex justify-center items-center min-h-screen">
+    <div class="flex flex-col items-center gap-4 mt-16">
+      <div class="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-on-surface-variant">Loading job details...</p>
+    </div>
+  </div>
+}
+
+<!-- Error State -->
+@if (!isLoading && errorMessage) {
+  <div class="flex flex-col items-center justify-center min-h-screen gap-4 mt-16">
+    <span class="material-symbols-outlined text-error text-5xl">error</span>
+    <p class="text-error font-semibold">{{ errorMessage }}</p>
+    <a routerLink="/find-jobs" class="bg-primary text-on-primary px-6 py-2 rounded-lg font-semibold">Back to Jobs</a>
+  </div>
+}
+
+<!-- Job Details Content -->
+@if (!isLoading && job) {
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative mt-16">
+    <!-- Left Column: Job Content -->
+    <article class="lg:col-span-8 space-y-10">
+      <!-- Hero Header -->
+      <div class="bg-surface-container-low rounded-xl p-8 border border-outline-variant/20 relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary-fixed/30 rounded-full blur-3xl opacity-60"></div>
+        <div class="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <span class="bg-tertiary-container/30 text-on-tertiary-container text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full border border-tertiary-container/50">
+                {{ job.jobType || 'Not specified' }}
+              </span>
+              <span class="text-on-surface-variant text-sm flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">schedule</span>
+                Posted {{ timeAgo(job.createdAt) }}
+              </span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-headline font-bold text-on-surface mb-2 leading-tight">{{ job.title }}</h1>
+            <p class="text-xl text-primary font-medium">{{ job.companyName }}</p>
+          </div>
+        </div>
+        <div class="relative z-10 mt-8 pt-6 border-t border-outline-variant/30 flex flex-wrap gap-6 text-sm text-on-surface-variant">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">location_on</span>
+            <span>{{ job.location || 'Location not specified' }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">payments</span>
+            <span>{{ formatSalary(job.salary) }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">work</span>
+            <span>{{ job.jobType || 'Not specified' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role Description -->
+      <section class="bg-surface rounded-xl p-8 border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)]">
+        <h2 class="text-2xl font-headline font-bold text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">description</span>
+          Job Description
+        </h2>
+        <div class="prose prose-lg text-on-surface-variant font-body">
+          <p class="whitespace-pre-line">{{ job.description || 'No description provided.' }}</p>
+        </div>
+      </section>
+    </article>
+
+    <!-- Right Column: Sticky Action -->
+    <aside class="lg:col-span-4 relative">
+      <div class="sticky top-24 space-y-6">
+        <!-- Action Card -->
+        <div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/30 shadow-[0_4px_20px_rgba(46,50,48,0.06)] text-center flex flex-col items-center">
+          <h3 class="font-headline font-bold text-xl text-on-surface mb-2">Ready to apply?</h3>
+          <p class="text-on-surface-variant text-sm mb-6">Submit your application for {{ job.title }} at {{ job.companyName }}.</p>
+          <button class="w-full bg-primary hover:bg-primary/90 text-on-primary font-bold py-4 rounded-xl shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5"
+            (click)="toggleApplyModal(true)">
+            Apply Now
+          </button>
+        </div>
+
+        <!-- Job Info Card -->
+        <div class="bg-surface rounded-xl p-6 border border-outline-variant/20 shadow-[0_4px_20px_rgba(46,50,48,0.06)]">
+          <h4 class="font-headline font-bold text-lg text-on-surface mb-4">Job Summary</h4>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between border-b border-outline-variant/20 pb-2">
+              <span class="text-on-surface-variant">Company</span>
+              <span class="font-medium text-on-surface">{{ job.companyName }}</span>
+            </div>
+            <div class="flex justify-between border-b border-outline-variant/20 pb-2">
+              <span class="text-on-surface-variant">Location</span>
+              <span class="font-medium text-on-surface">{{ job.location || 'Not specified' }}</span>
+            </div>
+            <div class="flex justify-between border-b border-outline-variant/20 pb-2">
+              <span class="text-on-surface-variant">Job Type</span>
+              <span class="font-medium text-on-surface">{{ job.jobType || 'Not specified' }}</span>
+            </div>
+            <div class="flex justify-between pb-2">
+              <span class="text-on-surface-variant">Salary</span>
+              <span class="font-medium text-on-surface">{{ formatSalary(job.salary) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Apply Modal -->
+  <div [class.hidden]="!showModal" [class.flex]="showModal" class="fixed inset-0 z-[100] items-center justify-center p-4 sm:p-6 bg-inverse-surface/40 backdrop-blur-sm">
+    <div class="bg-surface w-full max-w-2xl rounded-2xl shadow-2xl border border-outline-variant/20 overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center p-6 border-b border-outline-variant/20 bg-surface-container-low">
+        <div>
+          <h2 class="text-2xl font-headline font-bold text-on-surface">Apply to {{ job.companyName }}</h2>
+          <p class="text-sm text-on-surface-variant">{{ job.title }}</p>
+        </div>
+        <button class="text-on-surface-variant hover:text-error transition-colors p-2 rounded-full hover:bg-error-container/30" (click)="toggleApplyModal(false)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Success State -->
+      @if (submitSuccess) {
+        <div class="flex flex-col items-center justify-center p-12 gap-4">
+          <span class="material-symbols-outlined text-primary text-6xl">check_circle</span>
+          <h3 class="text-xl font-headline font-bold text-on-surface">Application Submitted!</h3>
+          <p class="text-on-surface-variant text-center">Your application for <strong>{{ job.title }}</strong> has been sent successfully.</p>
+          <button class="mt-4 bg-primary text-on-primary px-8 py-3 rounded-lg font-semibold" (click)="toggleApplyModal(false)">Close</button>
+        </div>
+      }
+
+      <!-- Form -->
+      @if (!submitSuccess) {
+        <div class="p-6 overflow-y-auto">
+          <form class="space-y-6" (ngSubmit)="submitApplication()">
+            <!-- Cover Letter -->
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-2" for="coverLetter">Cover Letter</label>
+              <p class="text-xs text-on-surface-variant mb-2">Tell us why you're a great fit for this role at {{ job.companyName }}.</p>
+              <textarea [(ngModel)]="coverLetter" name="coverLetter"
+                class="w-full bg-surface border border-outline-variant/50 rounded-lg text-on-surface focus:ring-primary focus:border-primary shadow-sm resize-y p-3"
+                id="coverLetter" placeholder="Write your cover letter here..." rows="8"></textarea>
+            </div>
+            @if (submitError) {
+              <div class="text-error text-sm text-center">{{ submitError }}</div>
+            }
+          </form>
+        </div>
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-outline-variant/20 bg-surface-container-low flex justify-end gap-4">
+          <button class="px-6 py-2 rounded-lg font-semibold text-secondary bg-surface border border-outline-variant/50 hover:bg-surface-container-highest transition-colors" (click)="toggleApplyModal(false)">
+            Cancel
+          </button>
+          <button class="px-8 py-2 rounded-lg font-semibold text-on-primary bg-primary hover:bg-primary/90 shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+            [disabled]="isSubmitting" (click)="submitApplication()">
+            @if (isSubmitting) { Submitting... } @else { Submit Application }
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
